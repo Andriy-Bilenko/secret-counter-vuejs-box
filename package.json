@@ -1,0 +1,25 @@
+{
+  "name": "secret-counter-vuejs-box",
+  "version": "1.0.0",
+  "description": "_(Brought to you by [Secret University](https://scrt.university))_",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "secretjs": "^1.12.5"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}

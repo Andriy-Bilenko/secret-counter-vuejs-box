@@ -2,14 +2,14 @@ import * as dotenv from "dotenv";
 import assert from "assert";
 import { Wallet, SecretNetworkClient, fromUtf8 } from "secretjs";
 
-dotenv.config({ path: __dirname+'/.env' });
+dotenv.config({ path: __dirname + "/.env" });
 
 // Secret.js Client
 let secretjs: SecretNetworkClient;
 
 const wallet = new Wallet(
-  "grant rice replace explain federal release fix clever romance raise often wild taxi quarter soccer fiber love must tape steak together observe swap guitar"
-)
+  "grant rice replace explain federal release fix clever romance raise often wild taxi quarter soccer fiber love must tape steak together observe swap guitar" // a
+);
 
 // Get environment variables from .env
 const secretBoxCode: string = process.env.SECRET_BOX_CODE!;
@@ -33,80 +33,76 @@ const initialize = async () => {
   });
 
   return secretjs;
-}
+};
 
-const queryCounter = async (
-    secretjs: SecretNetworkClient
-) => {
+const queryCounter = async (secretjs: SecretNetworkClient) => {
   type Response = { count: number };
 
   const response = (await secretjs.query.compute.queryContract({
-      contract_address: secretBoxAddress,
-      code_hash: secretBoxHash,
-      query: { get_count: {} },
+    contract_address: secretBoxAddress,
+    code_hash: secretBoxHash,
+    query: { get_count: {} },
   })) as Response;
 
   return response.count;
-}
+};
 
-const incrementCounter = async (
-    secretjs: SecretNetworkClient
-) => {
+const incrementCounter = async (secretjs: SecretNetworkClient) => {
   const tx = await secretjs.tx.compute.executeContract(
-  {
-    sender: wallet.address,
-    contract_address: secretBoxAddress,
-    code_hash: secretBoxHash,
-    msg: {
-      increment: {},
+    {
+      sender: wallet.address,
+      contract_address: secretBoxAddress,
+      code_hash: secretBoxHash,
+      msg: {
+        increment: {},
+      },
     },
-  },
-  {
-    gasLimit: 1_000_000,
-  });
-}
+    {
+      gasLimit: 1_000_000,
+    }
+  );
+};
 
-const resetCounter = async (
-  secretjs: SecretNetworkClient,
-  value: number,
-) => {
+const resetCounter = async (secretjs: SecretNetworkClient, value: number) => {
   const tx = await secretjs.tx.compute.executeContract(
-  {
-    sender: wallet.address,
-    contract_address: secretBoxAddress,
-    code_hash: secretBoxHash,
-    msg: {
-      reset: { count: value },
+    {
+      sender: wallet.address,
+      contract_address: secretBoxAddress,
+      code_hash: secretBoxHash,
+      msg: {
+        reset: { count: value },
+      },
     },
-  },
-  {
-    gasLimit: 1_000_000,
-  });
-}
+    {
+      gasLimit: 1_000_000,
+    }
+  );
+};
 
 (async () => {
   // Initialize the Secret.js client
-  const secretjs = await initialize()
+  const secretjs = await initialize();
 
   // Query the initial counter value
-  const beforeCount = await queryCounter(secretjs)
-  console.log(`initial counter value is ${beforeCount}`)
+  const beforeCount = await queryCounter(secretjs);
+  console.log(`initial counter value is ${beforeCount}`);
 
-  await incrementCounter(secretjs)
-  const afterCount = await queryCounter(secretjs)
+  await incrementCounter(secretjs);
+  const afterCount = await queryCounter(secretjs);
 
   assert(
-   afterCount == beforeCount + 1,
-    `After increment, counter expected to be ${beforeCount + 1} instead of ${afterCount}`
+    afterCount == beforeCount + 1,
+    `After increment, counter expected to be ${
+      beforeCount + 1
+    } instead of ${afterCount}`
   );
 
   // Reset counter value to 16876
-  await resetCounter(secretjs, 16876)
-  const resetCount = await queryCounter(secretjs)
+  await resetCounter(secretjs, 16876);
+  const resetCount = await queryCounter(secretjs);
 
   assert(
-   resetCount == 16876,
-    `After reset, counter expected to be 56 instead of ${resetCount}`
+    resetCount == 16876,
+    `After reset, counter expected to be 16876 instead of ${resetCount}`
   );
-
 })();
