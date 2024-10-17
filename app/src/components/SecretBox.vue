@@ -1,23 +1,104 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+// ADDED BY ME // ctrl+shift+I to open the console
+import { Wallet, SecretNetworkClient } from "secretjs"
+
+// Secret.js Client
+let secretjs: SecretNetworkClient
+
+const wallet = new Wallet(
+//   "grant rice replace explain federal release fix clever romance raise often wild taxi quarter soccer fiber love must tape steak together observe swap guitar" // a
+    "jacket universe option require immense under special winner rug evoke position profit" // testnet_kepl_wallet1
+)
+
+// console.log(`wallet mnemonic: = ${wallet.mnemonic}`) // works
+
+// Get environment variables from .env
+const secretBoxCode: string = import.meta.env.VITE_SECRET_BOX_CODE!;
+const secretBoxHash: string = import.meta.env.VITE_SECRET_BOX_HASH!;
+const secretBoxAddress: string = import.meta.env.VITE_SECRET_BOX_ADDRESS!;
+const localSecretUrl: string = import.meta.env.VITE_LOCALSECRET_LCD!; // meant to be RPC but can be LCD too
+const chainId: string = import.meta.env.VITE_CHAIN_ID!;
+
+console.log(`local url = ${localSecretUrl}`)
+console.log(`code id = ${secretBoxCode}`)
+console.log(`contract hash = ${secretBoxHash}`)
+console.log(`contract address = ${secretBoxAddress}`)
 
 const count = ref(0)
 const showApp = ref(true)
 
 onMounted(async () => {
   window.addEventListener('scroll', handleScroll)
+
+  // To create a signer secret.js client, also pass in a wallet
+  console.log("Initializing Secret.js client ...")
+  secretjs = await new SecretNetworkClient({
+    url: localSecretUrl,
+    chainId: chainId,
+    wallet: wallet,
+    walletAddress: wallet.address,
+  })
+  
+
+  console.log(`Created client for wallet address: ${wallet.address}`)
+
+  count.value = await queryCounter()
 })
+// END ADDED BY ME
 
-const queryCounter = () => {
-  return count.value
+const queryCounter = async () => {
+  type CountResponse = { count: number }
+
+  const response = (await secretjs.query.compute.queryContract({
+    contract_address: secretBoxAddress,
+    code_hash: secretBoxHash,
+    query: { get_count: {} },
+  })) as CountResponse;
+
+  if ('err"' in response) {
+    throw new Error(
+      `Query failed with the following err: ${JSON.stringify(response)}`
+    )
+  }
+
+  return response.count
 }
 
-const incrementCounter = () => {
-  count.value++
+const incrementCounter = async () => {
+  const tx = await secretjs.tx.compute.executeContract(
+  {
+    sender: wallet.address,
+    contract_address: secretBoxAddress,
+    code_hash: secretBoxHash,
+    msg: {
+      increment: {},
+    },
+  },
+  {
+    gasLimit: 1_000_000,
+  })
+
+  console.log("Increment by 1")
+  count.value = await queryCounter()
 }
 
-const resetCounter = () => {
-  count.value = 0
+const resetCounter = async () => {
+  const tx = await secretjs.tx.compute.executeContract(
+  {
+    sender: wallet.address,
+    contract_address: secretBoxAddress,
+    code_hash: secretBoxHash,
+    msg: {
+      reset: { count: 0 },
+    },
+  },
+  {
+    gasLimit: 1_000_000,
+  })
+
+  console.log("Counter reset")
+  count.value = await queryCounter()
 }
 
 const props = defineProps<{
