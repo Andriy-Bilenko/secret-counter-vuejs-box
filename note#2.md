@@ -120,3 +120,7 @@ cd app
 yarn add dotenv
 yarn remove dotenv
 ```
+
+```bash
+yarn add @keplr-wallet/types
+```
